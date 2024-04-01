@@ -1,0 +1,161 @@
+using System.IO;
+
+namespace CarSales
+{
+    public partial class CarSales : Form
+    {
+
+        private string[,] sales;
+        public CarSales()
+        {
+            InitializeComponent();
+            LoadTextFileIntoComboBox();
+
+        }
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+
+        private void LoadTextFileIntoComboBox()
+        {
+            string filePath = "C:\\Users\\zobai\\source\\repos\\CarSales\\VehiclesList.txt"; // Path to your text file
+
+
+            {
+
+
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        // Read all lines from the text file
+                        string[] lines = File.ReadAllLines(filePath);
+
+                        foreach (string line in lines)
+                        {
+                            // Split the line into car name and prices
+                            string[] parts = line.Split(',');
+
+                            if (parts.Length >= 5)
+                            {
+                                string carName = parts[0].Trim();
+                                // Extract prices from parts array
+                                string[] prices = new string[4];
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    prices[i] = parts[i + 1].Trim();
+                                }
+
+                                // Concatenate carName and prices with a space in between
+                                string displayText = $"{carName} - Prices: {string.Join(", ", prices)}";
+
+                                // Add the concatenated string to the ComboBox
+                                VehicleLists.Items.Add(displayText);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error reading file: " + ex.Message);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("File does not exist: " + filePath);
+                }
+
+
+            }
+
+
+
+        }
+        private decimal CalculateTotalGrossSales()
+        {
+            decimal totalGrossSales = 0;
+
+            foreach (string item in VehicleLists.Items)
+            {
+                // Split the item to extract car name and prices
+                string[] parts = item.Split(new string[] { " - Prices: " }, StringSplitOptions.None);
+                if (parts.Length == 2)
+                {
+                    // Extract prices string
+                    string pricesString = parts[1];
+                    // Split prices string to get individual prices
+                    string[] prices = pricesString.Split(new string[] { ", " }, StringSplitOptions.None);
+                    // Convert prices to decimal and sum them up
+                    foreach (string price in prices)
+                    {
+                        totalGrossSales += decimal.Parse(price.Trim(), System.Globalization.NumberStyles.Currency);
+                    }
+
+                }
+
+            }
+            return totalGrossSales;
+        }
+
+        private void GrossBtn_Click(object sender, EventArgs e)
+        {
+            DisplayGrossSales();
+
+
+        }
+
+
+        private void DisplayGrossSales() 
+        {
+
+            listBox1.Items.Clear();
+
+         
+            string selectedCar = VehicleLists.SelectedItem?.ToString();
+            if (selectedCar != null)
+            {
+         
+                string[] parts = selectedCar.Split(new string[] { " - Prices: " }, StringSplitOptions.None);
+                if (parts.Length == 2)
+                {
+                    
+                    string pricesString = parts[1];
+                
+                    string[] prices = pricesString.Split(new string[] { ", " }, StringSplitOptions.None);
+                 
+                    decimal totalCost = 0;
+                    foreach (string price in prices)
+                    {
+                        totalCost += decimal.Parse(price.Trim(), System.Globalization.NumberStyles.Currency);
+                    }
+                    
+                    listBox1.Items.Add(parts[0]);
+                    listBox1.Items.Add($"Total Cost: {totalCost:C}");
+
+                    decimal totalGrossSales = CalculateTotalGrossSales();
+                    listBox1.Items.Add($"Total Gross Sales: {totalGrossSales:C}");
+                }
+            }
+            else
+            {
+                listBox1.Items.Add("Please select a car from the list.");
+            }
+
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+    }
+}
